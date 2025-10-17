@@ -1,8 +1,3 @@
-// .env (example)
-// PORT=4000
-// MONGODB_URI=your_mongodb_uri
-// JWT_SECRET=change_me
-// JWT_EXPIRES_IN=7d
 
 import "dotenv/config";
 import express from "express";
@@ -10,6 +5,7 @@ import cors from "cors";
 import morgan from "morgan";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 
 // --- Existing Models ---
 import Package from "./models/Package.js";
@@ -31,6 +27,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(cookieParser());
 
 const PORT = process.env.PORT || 4000;
 const MONGODB_URI =
@@ -75,6 +72,7 @@ const ensurePrices = (payload = {}) => {
     };
 };
 
+
 // ---------- JWT helpers (Admin) ----------
 const signAdminToken = (admin) =>
     jwt.sign(
@@ -87,10 +85,29 @@ const signAdminToken = (admin) =>
         { expiresIn: JWT_EXPIRES_IN }
     );
 
+// const authAdmin = async (req, res, next) => {
+//     const auth = req.headers.authorization || "";
+//     const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+//     if (!token) return res.status(401).json({ error: "Missing token" });
+//     try {
+//         const payload = jwt.verify(token, JWT_SECRET);
+//         const admin = await Admin.findById(payload.sub);
+//         if (!admin || !admin.isActive)
+//             return res.status(401).json({ error: "Invalid token" });
+//         req.admin = admin;
+//         next();
+//     } catch {
+//         return res.status(401).json({ error: "Invalid token" });
+//     }
+// };
 const authAdmin = async (req, res, next) => {
     const auth = req.headers.authorization || "";
-    const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+    const bearer = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+    const cookieToken = req.cookies?.accessToken;
+    const token = bearer || cookieToken;
+
     if (!token) return res.status(401).json({ error: "Missing token" });
+
     try {
         const payload = jwt.verify(token, JWT_SECRET);
         const admin = await Admin.findById(payload.sub);
@@ -98,8 +115,9 @@ const authAdmin = async (req, res, next) => {
             return res.status(401).json({ error: "Invalid token" });
         req.admin = admin;
         next();
-    } catch {
-        return res.status(401).json({ error: "Invalid token" });
+    } catch (err) {
+        const msg = err?.name === "TokenExpiredError" ? "Token expired" : "Invalid token";
+        return res.status(401).json({ error: msg });
     }
 };
 
@@ -143,6 +161,35 @@ app.post("/api/admin/register", async (req, res) => {
     }
 });
 
+// app.post("/api/admin/login", async (req, res) => {
+//     try {
+//         const { email, password } = req.body || {};
+//         if (!email || !password)
+//             return res.status(400).json({ error: "email and password are required" });
+
+//         const admin = await Admin.findOne({ email }).select("+passwordHash");
+//         if (!admin) return res.status(401).json({ error: "Invalid credentials" });
+//         if (admin.isLocked)
+//             return res.status(423).json({ error: "Account locked. Try again later." });
+//         if (!admin.isActive)
+//             return res.status(403).json({ error: "Account disabled" });
+
+//         const ok = await admin.comparePassword(password);
+//         if (!ok) {
+//             await admin.incLoginAttempts();
+//             return res.status(401).json({ error: "Invalid credentials" });
+//         }
+
+//         admin.recordSuccessfulLogin();
+//         await admin.save();
+
+//         const token = signAdminToken(admin);
+//         res.json({ token, admin: admin.toJSON() });
+//     } catch (e) {
+//         console.error(e);
+//         res.status(500).json({ error: "Server error" });
+//     }
+// });
 app.post("/api/admin/login", async (req, res) => {
     try {
         const { email, password } = req.body || {};
@@ -151,10 +198,8 @@ app.post("/api/admin/login", async (req, res) => {
 
         const admin = await Admin.findOne({ email }).select("+passwordHash");
         if (!admin) return res.status(401).json({ error: "Invalid credentials" });
-        if (admin.isLocked)
-            return res.status(423).json({ error: "Account locked. Try again later." });
-        if (!admin.isActive)
-            return res.status(403).json({ error: "Account disabled" });
+        if (admin.isLocked) return res.status(423).json({ error: "Account locked. Try again later." });
+        if (!admin.isActive) return res.status(403).json({ error: "Account disabled" });
 
         const ok = await admin.comparePassword(password);
         if (!ok) {
@@ -166,7 +211,16 @@ app.post("/api/admin/login", async (req, res) => {
         await admin.save();
 
         const token = signAdminToken(admin);
-        res.json({ token, admin: admin.toJSON() });
+
+        // ⬇️ NEW: set secure HttpOnly cookie (and still return JSON if your SPA needs it)
+        res.cookie("accessToken", token, {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production", // true behind HTTPS
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        return res.json({ token, admin: admin.toJSON() });
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: "Server error" });
@@ -176,6 +230,53 @@ app.post("/api/admin/login", async (req, res) => {
 app.get("/api/admin/me", authAdmin, async (req, res) => {
     res.json({ admin: req.admin.toJSON() });
 });
+
+// New: Update current admin's details
+app.patch("/api/admin/me", authAdmin, async (req, res) => {
+    try {
+        const { firstName, lastName, email } = req.body;
+        const admin = req.admin;
+
+        if (firstName) admin.firstName = firstName;
+        if (lastName) admin.lastName = lastName;
+
+        // Note: Be cautious about allowing email changes without verification
+        if (email) admin.email = email;
+
+        // Example of how to handle password changes separately and securely
+        if (req.body.password) {
+            if (String(req.body.password).length < 8) {
+                return res
+                    .status(400)
+                    .json({ error: "Password must be at least 8 characters" });
+            }
+            admin.password = req.body.password;
+        }
+
+        await admin.save();
+        res.json({ admin: admin.toJSON(), message: "Profile updated successfully" });
+    } catch (e) {
+        if (e?.code === 11000 || String(e).includes("duplicate key")) {
+            return res.status(409).json({ error: "Email already in use" });
+        }
+        console.error("Admin update error:", e);
+        res.status(500).json({ error: "Server error during update" });
+    }
+});
+
+// New: Admin logout
+// For JWT, logout is typically handled client-side by deleting the token.
+// This endpoint is provided for completeness or if server-side logging is needed.
+app.post("/api/admin/logout", authAdmin, (req, res) => {
+    res.clearCookie("accessToken", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+    });
+    res.json({ ok: true, message: "Logged out successfully" });
+});
+
+
 
 // ---------- Packages ----------
 app.get("/api/packages", async (_req, res) => {
@@ -917,19 +1018,51 @@ app.get("/api/stats/overview", authAdmin, async (_req, res) => {
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 // ---------- STATIC FILES (frontend) ----------
-// serve the folder ONE LEVEL ABOVE backendTour (where index.html lives)
 const publicRoot = path.join(__dirname, "..");
-app.use(express.static(publicRoot));
 
-// send index.html for any non-API route (client-side routing / direct links)
-app.get(/^(?!\/api\/).*/, (_req, res) => {
-    res.sendFile(path.join(publicRoot, "index.html"));
+// Serve public static files (excluding protected folder)
+app.use(express.static(publicRoot, {
+    filter: (reqPath) => {
+        // Block direct access to protected folder
+        return !reqPath.startsWith('/protected/');
+    }
+}));
+
+// ---------- PROTECTED ROUTES ----------
+// Serve protected files only after authentication
+app.get(["/AdminDashboard", "/AdminDashboard.html", "/admin*", "/protected/*"], async (req, res) => {
+    const auth = req.headers.authorization || "";
+    const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+
+    if (!token) {
+        return res.redirect('/login?redirect=' + encodeURIComponent(req.originalUrl));
+    }
+
+    try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        const admin = await Admin.findById(payload.sub);
+        if (!admin || !admin.isActive) {
+            return res.redirect('/login?error=Invalid+session');
+        }
+
+        // For protected file requests, serve the actual file
+        if (req.path.startsWith('/protected/')) {
+            const filePath = path.join(publicRoot, req.path);
+            return res.sendFile(filePath);
+        }
+
+        // For dashboard routes, serve index.html
+        res.sendFile(path.join(publicRoot, "index.html"));
+    } catch (error) {
+        return res.redirect('/login?error=Invalid+token');
+    }
 });
 
-
-// app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
+// send index.html for any other non-API route
+app.get(/^(?!\/api\/).*/, (req, res) => {
+    res.sendFile(path.join(publicRoot, "index.html"));
+});
 
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`API running on http://0.0.0.0:${PORT}`);
 });
-
