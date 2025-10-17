@@ -649,9 +649,9 @@
       // ---- CONFIG ----
       const API_BASE =
         location.hostname === "localhost" || location.hostname === "127.0.0.1"
-          ? "http://localhost:4000"
+          ? "/api"
           : ""; // same-origin in prod
-      const DASHBOARD_URL = "/AdminDashboard.html"; // change to your real dashboard page
+      const DASHBOARD_URL = "/protected/AdminDashboard.html"; // change to your real dashboard page
 
       document.addEventListener("DOMContentLoaded", () => {
         const loginForm = document.getElementById("loginForm");
@@ -729,7 +729,7 @@
             loginBtn.innerHTML =
               '<i class="fas fa-spinner fa-spin"></i> Signing In...';
 
-            const resp = await fetch(`${API_BASE}/api/admin/login`, {
+            const resp = await fetch(`${API_BASE}/admin/login`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ email, password }),
