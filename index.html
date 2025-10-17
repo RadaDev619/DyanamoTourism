@@ -1,0 +1,2904 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Travel agency</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="./icon.png" type="image/png" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./assets/css/style.css" />
+
+    <!-- Custom Styles -->
+    <style>
+      /* Previous styles remain the same */
+      /* Lightbox Styles */
+      .lightbox {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+
+      .lightbox.active {
+        display: flex;
+      }
+
+      .lightbox-img {
+        max-width: 90%;
+        max-height: 80%;
+        object-fit: contain;
+      }
+
+      .lightbox-caption {
+        color: white;
+        margin-top: 15px;
+        font-size: 1.2rem;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .lightbox-close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: white;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+        background: none;
+        border: none;
+        transition: color 0.3s ease;
+      }
+
+      .lightbox-close:hover {
+        color: #ff7a21;
+      }
+
+      .lightbox-nav {
+        position: absolute;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 0 20px;
+      }
+
+      .lightbox-prev,
+      .lightbox-next {
+        color: white;
+        font-size: 40px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        transition: color 0.3s ease;
+      }
+
+      .lightbox-prev:hover,
+      .lightbox-next:hover {
+        color: #ff7a21;
+      }
+
+      /* View Details Button Styles */
+      .view-details-btn {
+        background: #ff7a21;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        margin-top: 15px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .view-details-btn:hover {
+        background: #e56a18;
+        transform: translateY(-2px);
+      }
+
+      /* Modal Styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        padding: 20px;
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal {
+        background-color: white;
+        border-radius: 12px;
+        width: 95%;
+        max-width: 900px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+      }
+
+      .modal-overlay.active .modal {
+        transform: translateY(0);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 25px;
+        border-bottom: 1px solid #eee;
+        background: linear-gradient(135deg, #0d47a1 0%, #1a73e8 100%);
+        color: white;
+        border-radius: 12px 12px 0 0;
+      }
+
+      .modal-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .close-modal:hover {
+        transform: scale(1.1);
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .modal-body {
+        padding: 25px;
+      }
+
+      .package-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .package-image {
+        border-radius: 12px;
+        overflow: hidden;
+        height: 250px;
+      }
+
+      .package-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .package-info h3 {
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+        color: #333;
+        font-weight: 700;
+      }
+
+      .package-location {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+        color: #666;
+        font-size: 1rem;
+      }
+
+      .package-description {
+        margin-bottom: 20px;
+        line-height: 1.6;
+        font-size: 1rem;
+      }
+
+      .package-features {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background-color: #e3f2fd;
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      .package-price {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1a73e8;
+      }
+
+      .package-price span {
+        font-size: 1rem;
+        font-weight: normal;
+        color: #666;
+        display: block;
+        margin-top: 4px;
+      }
+
+      .booking-form {
+        background-color: #f5f7fa;
+        padding: 25px;
+        border-radius: 12px;
+      }
+
+      .booking-form h3 {
+        margin-bottom: 20px;
+        color: #333;
+        font-size: 1.3rem;
+        font-weight: 700;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+        position: relative;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.9rem;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #1a73e8;
+        box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+      }
+
+      .form-group.error input,
+      .form-group.error select,
+      .form-group.error textarea {
+        border-color: #e53935;
+        box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
+      }
+
+      .error-message {
+        color: #e53935;
+        font-size: 0.8rem;
+        margin-top: 5px;
+        display: none;
+      }
+
+      .form-group.error .error-message {
+        display: block;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+      }
+
+      .btn-secondary {
+        background-color: #e0e0e0;
+        color: #333;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+      }
+
+      .btn-secondary:hover {
+        background-color: #d0d0d0;
+        transform: translateY(-2px);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        box-shadow: 0 3px 10px rgba(26, 115, 232, 0.3);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(26, 115, 232, 0.4);
+      }
+
+      /* Price Details Table Styles */
+      .price-details {
+        margin: 25px 0;
+        background-color: #f5f7fa;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      .price-details-header {
+        background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+        color: white;
+        padding: 15px 20px;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      .price-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .price-table th {
+        background-color: #e3f2fd;
+        color: #0d47a1;
+        font-weight: 600;
+        padding: 12px 15px;
+        text-align: left;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .price-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #e0e0e0;
+        font-size: 0.9rem;
+      }
+
+      .price-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .price-table tr:nth-child(even) {
+        background-color: rgba(255, 255, 255, 0.7);
+      }
+
+      .price-table tr:hover {
+        background-color: rgba(26, 115, 232, 0.05);
+      }
+
+      .highlight-price {
+        font-weight: 700;
+        color: #1a73e8;
+      }
+
+      /* Price Calculator Styles */
+      .price-calculator {
+        background-color: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 25px 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      .calculator-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .calculator-header h3 {
+        color: #333;
+        font-size: 1.3rem;
+        font-weight: 700;
+      }
+
+      .calculator-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .calculator-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .calculator-group label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+        font-size: 0.9rem;
+      }
+
+      .calculator-group select,
+      .calculator-group input {
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+
+      .calculator-group select:focus,
+      .calculator-group input:focus {
+        outline: none;
+        border-color: #1a73e8;
+        box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+      }
+
+      .calculator-results {
+        background-color: #e3f2fd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 15px;
+      }
+
+      .result-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .result-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .result-label {
+        font-weight: 500;
+        color: #333;
+      }
+
+      .result-value {
+        font-weight: 600;
+        color: #1a73e8;
+      }
+
+      .total-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #0d47a1;
+      }
+
+      /* WhatsApp Button in booking form (already present) */
+      .whatsapp-btn {
+        background-color: #25d366;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        box-shadow: 0 3px 10px rgba(37, 211, 102, 0.3);
+        margin-top: 15px;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .whatsapp-btn:hover {
+        background-color: #128c7e;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+      }
+
+      /* ===============================
+       *        UPCOMING EVENTS STYLES       *
+       * =============================== */
+      .events-scrolling-wrapper {
+        overflow-x: auto;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .events-list {
+        display: flex;
+        gap: 30px;
+        padding: 10px 5px;
+        list-style: none;
+        margin: 0;
+      }
+
+      .events-scrolling-wrapper::-webkit-scrollbar {
+        height: 8px;
+      }
+      .events-scrolling-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      .events-scrolling-wrapper::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 10px;
+      }
+      .events-scrolling-wrapper::-webkit-scrollbar-thumb:hover {
+        background: #aaa;
+      }
+
+      .event-card {
+        flex: 0 0 350px;
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .event-card-banner {
+        height: 200px;
+        overflow: hidden;
+      }
+
+      .event-card-banner img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+      }
+
+      .event-card:hover .event-card-banner img {
+        transform: scale(1.05);
+      }
+
+      .event-card-content {
+        padding: 20px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .event-card-title {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+        color: #333;
+      }
+
+      .event-card-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        color: #666;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+      }
+
+      .event-card-info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .event-card-info-item i {
+        color: #1a73e8;
+        width: 16px;
+        text-align: center;
+      }
+
+      .event-card-actions {
+        margin-top: auto;
+      }
+
+      /* Font Awesome Icons */
+      .fas,
+      .far {
+        margin-right: 5px;
+      }
+
+      /* Package Section Animation Styles */
+      .package-list {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.8s ease, transform 0.8s ease;
+      }
+
+      .package-list.animate {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .package-card {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+        transition-delay: calc(var(--delay, 0) * 0.1s);
+      }
+
+      .package-card.animate {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Enhanced Hero Section Styles */
+      .hero {
+        position: relative;
+        height: 100vh;
+        min-height: 700px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+       background-image: linear-gradient(rgba(211, 211, 211, 0.7), rgba(255, 255, 255, 0.5)),
+  url("./assets/images/indeximage.jpg");
+
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+            circle at 20% 80%,
+            rgba(33, 150, 243, 0.3) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 20%,
+            rgba(255, 193, 7, 0.2) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 40%,
+            rgba(156, 39, 176, 0.15) 0%,
+            transparent 50%
+          );
+        animation: gradientShift 15s ease infinite;
+        z-index: 1;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        max-width: 800px;
+        padding: 0 20px;
+      }
+
+      .hero-title {
+        font-size: clamp(2.5rem, 5vw, 4.5rem);
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        color: white;
+        text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        transform: translateY(30px);
+        animation: titleReveal 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards 0.5s;
+      }
+
+      .hero-title span {
+        display: inline-block;
+        color: white;
+        position: relative;
+      }
+
+      .hero-title span::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(45deg, #1a73e8, #0d47a1);
+        transform: scaleX(0);
+        transform-origin: left;
+        animation: underlineReveal 1s ease forwards 1.5s;
+      }
+
+      .hero-text {
+        font-size: 1.25rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 2.5rem;
+        line-height: 1.6;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeUp 1s ease forwards 0.8s;
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeUp 1s ease forwards 1s;
+      }
+
+      .hero-btn {
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        position: relative;
+        overflow: hidden;
+        border: none;
+        cursor: pointer;
+      }
+
+      .hero-btn-primary {
+        background: linear-gradient(45deg, #1a73e8, #0d47a1);
+        color: white;
+        box-shadow: 0 10px 20px rgba(33, 150, 243, 0.3);
+      }
+
+      .hero-btn-primary:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(33, 150, 243, 0.4);
+      }
+
+      .hero-btn-secondary {
+        background: transparent;
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .hero-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-5px);
+      }
+
+      /* Floating elements */
+      .floating-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .floating-element {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        animation: float 15s infinite ease-in-out;
+      }
+
+      .floating-element:nth-child(1) {
+        width: 80px;
+        height: 80px;
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+      }
+
+      .floating-element:nth-child(2) {
+        width: 120px;
+        height: 120px;
+        top: 60%;
+        left: 80%;
+        animation-delay: 2s;
+      }
+
+      .floating-element:nth-child(3) {
+        width: 60px;
+        height: 60px;
+        top: 40%;
+        left: 70%;
+        animation-delay: 4s;
+      }
+
+      .floating-element:nth-child(4) {
+        width: 100px;
+        height: 100px;
+        top: 80%;
+        left: 20%;
+        animation-delay: 6s;
+      }
+
+      .floating-element:nth-child(5) {
+        width: 70px;
+        height: 70px;
+        top: 30%;
+        left: 40%;
+        animation-delay: 8s;
+      }
+
+      /* Scroll indicator */
+      .scroll-indicator {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+        color: white;
+        text-align: center;
+        opacity: 0;
+        animation: fadeIn 1s ease forwards 2s;
+      }
+
+      .scroll-indicator p {
+        margin-bottom: 10px;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      .scroll-indicator .arrow {
+        display: block;
+        width: 20px;
+        height: 20px;
+        border-right: 2px solid white;
+        border-bottom: 2px solid white;
+        transform: rotate(45deg);
+        margin: 0 auto;
+        animation: bounce 2s infinite;
+      }
+
+      /* Particle effect */
+      .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        animation: particleFloat 20s infinite linear;
+      }
+
+      /* Feedback Section Styles */
+      .feedback {
+        padding: 80px 0;
+        background-color: #f9fafc;
+      }
+
+      .feedback-form-container {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 50px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      }
+
+      .feedback-form-title {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+        color: #333;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .rating-input {
+        display: flex;
+        gap: 5px;
+        margin-top: 8px;
+      }
+
+      .rating-input .star {
+        font-size: 28px;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s ease;
+      }
+
+      .rating-input .star:hover,
+      .rating-input .star.active {
+        color: #ffc107;
+      }
+
+      /* Testimonials Styles */
+      .testimonials-container {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      }
+
+      .testimonials-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .testimonials-title {
+        font-size: 1.5rem;
+        color: #333;
+        font-weight: 700;
+      }
+
+      .testimonials-filter {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .filter-btn {
+        background: #f5f7fa;
+        color: #666;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .filter-btn.active,
+      .filter-btn:hover {
+        background: #1a73e8;
+        color: white;
+      }
+
+      .testimonials-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      .testimonial-card {
+        background: #f9fafc;
+        border-radius: 12px;
+        padding: 25px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid #eaeaea;
+      }
+
+      .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .testimonial-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+      }
+
+      .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .author-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1a73e8, #0d47a1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+      }
+
+      .author-info h4 {
+        margin: 0 0 5px 0;
+        font-size: 1.1rem;
+        color: #333;
+      }
+
+      .author-info p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #666;
+      }
+
+      .testimonial-rating {
+        color: #ffc107;
+        font-size: 1.1rem;
+      }
+
+      .testimonial-category {
+        display: inline-block;
+        background: #e3f2fd;
+        color: #1a73e8;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .testimonial-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #333;
+      }
+
+      .testimonial-text {
+        color: #555;
+        line-height: 1.6;
+        font-size: 0.95rem;
+      }
+
+      .testimonial-date {
+        margin-top: 15px;
+        font-size: 0.8rem;
+        color: #888;
+        text-align: right;
+      }
+
+      .testimonials-actions {
+        text-align: center;
+      }
+
+      /* Success Message Styles */
+      .feedback-success {
+        background: #e8f5e9;
+        border: 1px solid #4caf50;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        text-align: center;
+        color: #2e7d32;
+        display: none;
+      }
+
+      .feedback-success.active {
+        display: block;
+      }
+
+      .success-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #4caf50;
+      }
+
+      /* Empty State */
+      .empty-testimonials {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+      }
+
+      .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #ddd;
+      }
+
+      /* Hero animations */
+      @keyframes titleReveal {
+        0% {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes underlineReveal {
+        0% {
+          transform: scaleX(0);
+        }
+        100% {
+          transform: scaleX(1);
+        }
+      }
+
+      @keyframes fadeUp {
+        0% {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes gradientShift {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0) translateX(0) rotate(0deg);
+          opacity: 0.7;
+        }
+        25% {
+          transform: translateY(-20px) translateX(10px) rotate(90deg);
+          opacity: 1;
+        }
+        50% {
+          transform: translateY(-10px) translateX(20px) rotate(180deg);
+          opacity: 0.7;
+        }
+        75% {
+          transform: translateY(-15px) translateX(-10px) rotate(270deg);
+          opacity: 0.9;
+        }
+      }
+
+      @keyframes bounce {
+        0%,
+        20%,
+        50%,
+        80%,
+        100% {
+          transform: translateY(0) rotate(45deg);
+        }
+        40% {
+          transform: translateY(-10px) rotate(45deg);
+        }
+        60% {
+          transform: translateY(-5px) rotate(45deg);
+        }
+      }
+
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes particleFloat {
+        0% {
+          transform: translateY(100vh) translateX(0);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-100px) translateX(100px);
+          opacity: 0;
+        }
+      }
+
+      /* Responsive Styles */
+      @media (max-width: 768px) {
+        .package-details {
+          grid-template-columns: 1fr;
+          gap: 25px;
+        }
+
+        .form-row {
+          grid-template-columns: 1fr;
+          gap: 15px;
+        }
+
+        .form-actions {
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .modal-body {
+          padding: 20px;
+        }
+
+        .booking-form {
+          padding: 20px;
+        }
+
+        .price-table {
+          display: block;
+          overflow-x: auto;
+        }
+
+        .calculator-form {
+          grid-template-columns: 1fr;
+        }
+
+        .carousel-container {
+          height: 500px;
+        }
+
+        .carousel-title {
+          font-size: 2rem;
+        }
+
+        .carousel-content {
+          padding: 30px;
+        }
+
+        .carousel-btn {
+          width: 50px;
+          height: 50px;
+          font-size: 1.2rem;
+        }
+
+        .hero {
+          min-height: 600px;
+        }
+
+        .hero-title {
+          font-size: 2.5rem;
+        }
+
+        .hero-text {
+          font-size: 1.1rem;
+        }
+
+        .testimonials-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .testimonials-filter {
+          width: 100%;
+        }
+
+        .testimonials-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .feedback-form-container,
+        .testimonials-container {
+          padding: 20px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .event-card {
+          flex: 0 0 300px; /* Slightly smaller cards on mobile */
+        }
+        .hero {
+          min-height: 500px;
+        }
+
+        .hero-title {
+          font-size: 2rem;
+        }
+
+        .hero-buttons {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .hero-btn {
+          width: 100%;
+          max-width: 250px;
+        }
+
+        .testimonial-header {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .testimonial-rating {
+          align-self: flex-start;
+        }
+      }
+
+      /* ===============================
+     WhatsApp Floating Button + Popup
+     =============================== */
+      .whatsapp-fab {
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        width: 56px;
+        height: 56px;
+        border: none;
+        border-radius: 50%;
+        background: #25d366;
+        color: #fff;
+        box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        z-index: 10050;
+        transition: transform 0.2s ease, box-shadow 0.2s ease,
+          background 0.2s ease;
+      }
+      .whatsapp-fab i {
+        font-size: 26px;
+        line-height: 1;
+      }
+      .whatsapp-fab:hover {
+        transform: translateY(-3px);
+        background: #1ebe5d;
+        box-shadow: 0 14px 34px rgba(37, 211, 102, 0.5);
+      }
+
+      .whatsapp-popup {
+        position: fixed;
+        right: 22px;
+        bottom: 88px;
+        width: 340px;
+        max-width: calc(100% - 44px);
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+        overflow: hidden;
+        display: none;
+        z-index: 10060;
+      }
+      .whatsapp-popup.active {
+        display: block;
+      }
+
+      .wp-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 14px;
+        background: #25d366;
+        color: #fff;
+      }
+      .wp-header .fab.fa-whatsapp {
+        font-size: 22px;
+      }
+      .wp-title-wrap {
+        line-height: 1.2;
+      }
+      .wp-title-wrap small {
+        opacity: 0.9;
+      }
+      .wp-close {
+        margin-left: auto;
+        border: none;
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 20px;
+        display: grid;
+        place-items: center;
+      }
+
+      .wp-body {
+        padding: 14px;
+        background: #fff;
+      }
+      .wp-field {
+        margin-bottom: 12px;
+      }
+      .wp-field label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 6px;
+      }
+      .wp-field input,
+      .wp-field textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        font-family: inherit;
+      }
+      .wp-field input:focus,
+      .wp-field textarea:focus {
+        outline: none;
+        border-color: #1a73e8;
+        box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+      }
+      .wp-note {
+        display: block;
+        margin-top: 8px;
+        color: #666;
+        font-size: 0.78rem;
+      }
+
+      /* ===============================
+     Testimonial Slider Styles
+     =============================== */
+      .testimonial-slider {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+      }
+
+      .testimonial-slider .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      .testimonial-slider .section-subtitle {
+        text-align: center;
+        color: #1a73e8;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+      }
+
+      .testimonial-slider .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        color: #333;
+        margin-bottom: 20px;
+        font-weight: 700;
+        font-family: "Montserrat", sans-serif;
+      }
+
+      .testimonial-slider .section-text {
+        text-align: center;
+        max-width: 600px;
+        margin: 0 auto 50px;
+        color: #666;
+        line-height: 1.6;
+        font-size: 1.1rem;
+      }
+
+      .testimonial-slider-container {
+        position: relative;
+        max-width: 1000px;
+        margin: 0 auto;
+        overflow: hidden;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        background: white;
+      }
+
+      .testimonial-slider-track {
+        display: flex;
+        transition: transform 0.5s ease;
+      }
+
+      .testimonial-slide {
+        min-width: 100%;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .testimonial-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin-bottom: 25px;
+        border: 5px solid #e3f2fd;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .testimonial-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .testimonial-rating-slider {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 20px;
+      }
+
+      .testimonial-rating-slider .star {
+        color: #ffc107;
+        font-size: 24px;
+      }
+
+      .testimonial-text-slider {
+        font-size: 1.2rem;
+        line-height: 1.7;
+        color: #555;
+        margin-bottom: 25px;
+        font-style: italic;
+        max-width: 700px;
+      }
+
+      .testimonial-author-slider {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 5px;
+        font-family: "Montserrat", sans-serif;
+      }
+
+      .testimonial-location {
+        color: #666;
+        font-size: 1rem;
+        margin-bottom: 15px;
+      }
+
+      .testimonial-package {
+        display: inline-block;
+        background: linear-gradient(135deg, #1a73e8, #0d47a1);
+        color: white;
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .testimonial-slider-nav {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .testimonial-slider-btn {
+        background: #1a73e8;
+        color: white;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1.2rem;
+        box-shadow: 0 5px 15px rgba(26, 115, 232, 0.3);
+      }
+
+      .testimonial-slider-btn:hover {
+        background: #0d47a1;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(26, 115, 232, 0.4);
+      }
+
+      .testimonial-slider-dots {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 25px;
+      }
+
+      .testimonial-slider-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #ddd;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .testimonial-slider-dot.active {
+        background: #1a73e8;
+        transform: scale(1.2);
+      }
+
+      @media (max-width: 768px) {
+        .testimonial-slider .section-title {
+          font-size: 2rem;
+        }
+
+        .testimonial-slide {
+          padding: 30px 20px;
+        }
+
+        .testimonial-text-slider {
+          font-size: 1.1rem;
+        }
+
+        .testimonial-avatar {
+          width: 100px;
+          height: 100px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .testimonial-slider .section-title {
+          font-size: 1.8rem;
+        }
+
+        .testimonial-slide {
+          padding: 25px 15px;
+        }
+
+        .testimonial-text-slider {
+          font-size: 1rem;
+        }
+
+        .testimonial-avatar {
+          width: 80px;
+          height: 80px;
+        }
+
+        .testimonial-slider-btn {
+          width: 40px;
+          height: 40px;
+          font-size: 1rem;
+        }
+      }
+    </style>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+
+  <body id="top">
+    <!-- Header -->
+<header class="header" data-header>
+  <div class="overlay" data-overlay></div>
+
+  <!-- Top bar -->
+  <div class="header-top">
+    <div class="container">
+      <a href="tel:+01123456790" class="helpline-box">
+        <div class="icon-box">
+          <ion-icon name="call-outline"></ion-icon>
+        </div>
+        <div class="wrapper">
+          <p class="helpline-title">For Further Inquires :</p>
+          <p class="helpline-number">+01 (123) 4567 90</p>
+        </div>
+      </a>
+
+      <!-- MAIN LOGO (top bar) -->
+      <a href="#" class="logo"
+         style="display:inline-flex;align-items:center;height:56px">
+        <img
+          src="./assets/images/onlylogo.png" 
+          alt="Dynamo Premium Tourism"
+          style="height:100%;width:auto;display:block;object-fit:contain"
+        />
+      </a>
+
+      <div class="header-btn-group">
+        <button class="nav-open-btn" aria-label="Open Menu" data-nav-open-btn>
+          <ion-icon name="menu-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar / nav -->
+  <div class="header-bottom">
+    <div class="container">
+      <ul class="social-list">
+        <li><a href="#" class="social-link"><ion-icon name="logo-facebook"></ion-icon></a></li>
+        <li><a href="#" class="social-link"><ion-icon name="logo-twitter"></ion-icon></a></li>
+        <li><a href="#" class="social-link"><ion-icon name="logo-youtube"></ion-icon></a></li>
+      </ul>
+
+      <nav class="navbar" data-navbar>
+        <div class="navbar-top">
+
+          <!-- MOBILE/NAV DRAWER LOGO -->
+          <a href="#" class="logo"
+             style="display:inline-flex;align-items:center;height:48px">
+            <img
+              src="./assets/images/logoWhite.png"  
+              alt="Dynamo Premium Tourism"
+              style="height:100%;width:auto;display:block;object-fit:contain"
+            />
+          </a>
+
+          <button class="nav-close-btn" aria-label="Close Menu" data-nav-close-btn>
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <ul class="navbar-list">
+          <li><a href="index.html" class="navbar-link" data-nav-link>home</a></li>
+          <li><a href="AboutUs.html" class="navbar-link" data-nav-link>about us</a></li>
+          <li><a href="packages.html" class="navbar-link" data-nav-link>packages</a></li>
+          <li><a href="contactUs.html" class="navbar-link" data-nav-link>Contact us</a></li>
+          <li><a href="services.html" class="navbar-link" data-nav-link>Services</a></li>
+        </ul>
+      </nav>
+
+      <button class="btn btn-primary">Book Now</button>
+    </div>
+  </div>
+</header>
+
+
+    <main>
+      <article>
+        <!-- Enhanced Hero Section -->
+        <section class="hero" id="home">
+          <!-- Floating elements -->
+          <div class="floating-elements">
+            <div class="floating-element"></div>
+            <div class="floating-element"></div>
+            <div class="floating-element"></div>
+            <div class="floating-element"></div>
+            <div class="floating-element"></div>
+          </div>
+
+          <!-- Particle effect -->
+          <div class="particles" id="particles"></div>
+
+          <div class="hero-content">
+            <h1 class="hero-title">
+              <span>Journey to explore world</span>
+            </h1>
+            <p class="hero-text">
+              Ac mi duis mollis. Sapiente? Scelerisque quae, penatibus? Suscipit
+              class corporis nostra rem quos voluptatibus habitant? Fames,
+              vivamus minim nemo enim, gravida lobortis quasi, eum.
+            </p>
+
+            <div class="hero-buttons">
+              <button class="hero-btn hero-btn-primary">Learn more</button>
+              <button class="hero-btn hero-btn-secondary">Book now</button>
+            </div>
+          </div>
+
+          <!-- Scroll indicator -->
+          <div class="scroll-indicator">
+            <p>Scroll to explore</p>
+            <span class="arrow"></span>
+          </div>
+        </section>
+
+        <!-- Upcoming Events Section -->
+        <section class="popular" id="events">
+          <div class="container">
+            <p class="section-subtitle">Don't Miss Out</p>
+            <h2 class="h2 section-title">Upcoming Events</h2>
+            <p class="section-text">
+              Check out our curated list of upcoming events. There's always
+              something exciting happening around the corner!
+            </p>
+
+            <!-- Scrolling Cards Container -->
+            <div class="events-scrolling-wrapper">
+              <ul class="events-list">
+                <!-- Event cards will be dynamically generated here by JavaScript -->
+              </ul>
+            </div>
+
+            <button class="btn btn-primary">More Events</button>
+          </div>
+        </section>
+
+        <!-- Popular Packages -->
+        <section class="package" id="package">
+          <div class="container">
+            <p class="section-subtitle">Popular Packages</p>
+            <h2 class="h2 section-title">Checkout Our Packages</h2>
+            <p class="section-text">
+              Fusce hic augue velit wisi quibusdam pariatur, iusto primis, nec
+              nemo, rutrum. Vestibulum cumque laudantium. Sit ornare mollitia
+              tenetur, aptent.
+            </p>
+            <ul class="package-list" id="package-list">
+              <!-- Package cards will be dynamically loaded here -->
+            </ul>
+
+            <button class="btn btn-primary">View All Packages</button>
+          </div>
+        </section>
+
+        <!-- Testimonial Slider Section -->
+        <section class="testimonial-slider" id="testimonials">
+          <div class="container">
+            <p class="section-subtitle">Traveler Reviews</p>
+            <h2 class="section-title">What Our Travelers Say</h2>
+            <p class="section-text">
+              Hear from our amazing travelers about their experiences and
+              adventures around the world.
+            </p>
+            <div class="testimonial-slider-container">
+              <div class="testimonial-slider-track" id="testimonialTrack">
+                <!-- Testimonial slides will be dynamically generated here -->
+              </div>
+            </div>
+
+            <div class="testimonial-slider-nav">
+              <button class="testimonial-slider-btn" id="testimonialPrev">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <button class="testimonial-slider-btn" id="testimonialNext">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+
+            <div class="testimonial-slider-dots" id="testimonialDots">
+              <!-- Dots will be dynamically generated here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Lightbox -->
+        <div class="lightbox" id="lightbox">
+          <button class="lightbox-close" id="lightbox-close">&times;</button>
+          <div class="lightbox-nav">
+            <button class="lightbox-prev" id="lightbox-prev">&#10094;</button>
+            <button class="lightbox-next" id="lightbox-next">&#10095;</button>
+          </div>
+          <img class="lightbox-img" id="lightbox-img" src="" alt="" />
+          <div class="lightbox-caption" id="lightbox-caption"></div>
+        </div>
+
+        <!-- CTA -->
+        <section class="cta" id="contact">
+          <div class="container">
+            <div class="cta-content">
+              <p class="section-subtitle">Call To Action</p>
+              <h2 class="h2 section-title">
+                Ready For Unforgatable Travel. Remember Us!
+              </h2>
+              <p class="section-text">
+                Fusce hic augue velit wisi quibusdam pariatur, iusto primis, nec
+                nemo, rutrum. Vestibulum cumque laudantium. Sit ornare mollitia
+                tenetur, aptent.
+              </p>
+            </div>
+            <button class="btn btn-secondary">Contact Us !</button>
+          </div>
+        </section>
+      </article>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-top">
+        <div class="container">
+          <div class="footer-brand">
+            <a href="#" class="logo">
+              <img src="./assets/images/sideLogoWhite.png" alt="Tourly logo" />
+            </a>
+            <p class="footer-text">
+              Urna ratione ante harum provident, eleifend, vulputate molestiae
+              proin fringilla, praesentium magna conubia at perferendis,
+              pretium, aenean aut ultrices.
+            </p>
+          </div>
+          <div class="footer-contact">
+            <h4 class="contact-title">Contact Us</h4>
+            <p class="contact-text">Feel free to contact and reach us !!</p>
+            <ul>
+              <li class="contact-item">
+                <ion-icon name="call-outline"></ion-icon>
+                <a href="tel:+01123456790" class="contact-link"
+                  >+01 (123) 4567 90</a
+                >
+              </li>
+              <li class="contact-item">
+                <ion-icon name="mail-outline"></ion-icon>
+                <a href="mailto:info.tourly.com" class="contact-link"
+                  >info.tourly.com</a
+                >
+              </li>
+              <li class="contact-item">
+                <ion-icon name="location-outline"></ion-icon>
+                <address>3146 Koontz, California</address>
+              </li>
+            </ul>
+          </div>
+          <div class="footer-form">
+            <p class="form-text">
+              Subscribe our newsletter for more update & news !!
+            </p>
+            <form action="" class="form-wrapper">
+              <input
+                type="email"
+                name="email"
+                class="input-field"
+                placeholder="Enter Your Email"
+                required
+              />
+              <button type="submit" class="btn btn-secondary">Subscribe</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container">
+          <p class="copyright">
+            &copy; 2025 <a href="">Dynamo Happiness </a>. All rights reserved
+          </p>
+          <ul class="footer-bottom-list">
+            <li>
+              <a href="#" class="footer-bottom-link">Privacy Policy</a>
+            </li>
+            <li>
+              <a href="#" class="footer-bottom-link">Term & Condition</a>
+            </li>
+            <li>
+              <a href="#" class="footer-bottom-link">FAQ</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Modal for Package Details -->
+    <div class="modal-overlay" id="packageModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Package Details</h2>
+          <button class="close-modal" id="closeModal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+          <!-- Modal content will be dynamically generated here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Event Details -->
+    <div class="modal-overlay" id="eventModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Event Details</h2>
+          <button class="close-modal" id="closeEventModal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="eventModalBody">
+          <!-- Event details will be dynamically injected here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- WhatsApp Chat (replaces the old "Go To Top" button) -->
+    <button class="whatsapp-fab" id="whatsappFab" aria-label="Chat on WhatsApp">
+      <i class="fab fa-whatsapp"></i>
+    </button>
+
+    <div
+      class="whatsapp-popup"
+      id="whatsappPopup"
+      aria-hidden="true"
+      role="dialog"
+      aria-labelledby="wpTitle"
+    >
+      <div class="wp-header">
+        <i class="fab fa-whatsapp"></i>
+        <div class="wp-title-wrap">
+          <strong id="wpTitle">Chat with us on WhatsApp</strong>
+          <small>Typically replies in minutes</small>
+        </div>
+        <button class="wp-close" id="wpClose" aria-label="Close">
+          &times;
+        </button>
+      </div>
+      <div class="wp-body">
+        <div class="wp-field">
+          <label for="wpName">Your name</label>
+          <input type="text" id="wpName" placeholder="e.g., Alex" />
+        </div>
+        <div class="wp-field">
+          <label for="wpMessage">Message</label>
+          <textarea
+            id="wpMessage"
+            rows="3"
+            placeholder="Hi! I’m interested in a tour package."
+          ></textarea>
+        </div>
+        <button class="btn btn-primary" id="wpStart">
+          Start WhatsApp Chat
+        </button>
+        <small class="wp-note">You’ll be redirected to WhatsApp.</small>
+      </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="./assets/js/script.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+      // Make sure the DOM is fully loaded before running scripts
+      document.addEventListener("DOMContentLoaded", function () {
+        /**********************************************
+         *            API AND DYNAMIC CONTENT           *
+         **********************************************/
+
+        const API_BASE_URL = "http://localhost:4000/api";
+        let fetchedEvents = []; // Cache for event modal
+
+        // Main function to fetch data and initialize the page
+        async function initializePage() {
+          try {
+            // Run all content fetching in parallel
+            await Promise.all([
+              fetchPackages().then(renderPackages),
+              fetchEvents().then(renderUpcomingEvents),
+              fetchTestimonials().then(initTestimonialSlider),
+            ]);
+          } catch (error) {
+            console.error("Failed to initialize page:", error);
+            // You might want to show a general error message to the user
+          }
+        }
+
+        // --- Package Functions ---
+        async function fetchPackages() {
+          try {
+            const response = await fetch(`${API_BASE_URL}/packages`);
+            if (!response.ok) throw new Error("Failed to load packages.");
+            return response.json();
+          } catch (error) {
+            console.error(error);
+            document.getElementById(
+              "package-list"
+            ).innerHTML = `<li><p style="color: red;">${error.message}</p></li>`;
+            return []; // Return empty array on failure
+          }
+        }
+
+        async function fetchPackageBySlug(slug) {
+          const response = await fetch(`${API_BASE_URL}/packages/${slug}`);
+          if (!response.ok) {
+            throw new Error(`Could not find package with slug: ${slug}`);
+          }
+          return response.json();
+        }
+
+        // --- Event Functions ---
+        async function fetchEvents() {
+          try {
+            const response = await fetch(`${API_BASE_URL}/events`);
+            if (!response.ok)
+              throw new Error("Failed to load upcoming events.");
+            return response.json();
+          } catch (error) {
+            console.error(error);
+            const eventsList = document.querySelector(".events-list");
+            if (eventsList)
+              eventsList.innerHTML = `<li><p style="color: red;">${error.message}</p></li>`;
+            return [];
+          }
+        }
+
+        // --- Testimonial Functions ---
+        async function fetchTestimonials() {
+          try {
+            const response = await fetch(`${API_BASE_URL}/testimonials`);
+            if (!response.ok) throw new Error("Failed to load testimonials.");
+            return response.json();
+          } catch (error) {
+            console.error(error);
+            const testimonialTrack =
+              document.getElementById("testimonialTrack");
+            if (testimonialTrack)
+              testimonialTrack.innerHTML = `<div class="testimonial-slide"><p style="color: red;">${error.message}</p></div>`;
+            return [];
+          }
+        }
+
+        // Render the list of packages on the page
+        function renderPackages(packages) {
+          const packageList = document.getElementById("package-list");
+          if (!packageList || !packages.length) return;
+
+          packageList.innerHTML = ""; // Clear existing static content
+
+          packages.forEach((pkg, index) => {
+            const card = document.createElement("li");
+            card.innerHTML = `
+            <div class="package-card" style="--delay: ${index}">
+              <figure class="card-banner">
+                <img src="${
+                  pkg.image || "./assets/images/packege-1.jpg"
+                }" alt="${pkg.title}" loading="lazy" />
+              </figure>
+              <div class="card-content">
+                <h3 class="h3 card-title">${pkg.title}</h3>
+                <p class="card-text">${pkg.description.substring(0, 100)}...</p>
+                <ul class="card-meta-list">
+                  <li class="card-meta-item">
+                    <div class="meta-box">
+                      <ion-icon name="time"></ion-icon>
+                      <p class="text">${pkg.durationText || "N/A"}</p>
+                    </div>
+                  </li>
+                  <li class="card-meta-item">
+                    <div class="meta-box">
+                      <ion-icon name="people"></ion-icon>
+                      <p class="text">pax: ${pkg.travelers || "N/A"}</p>
+                    </div>
+                  </li>
+                  <li class="card-meta-item">
+                    <div class="meta-box">
+                      <ion-icon name="location"></ion-icon>
+                      <p class="text">${pkg.location || "N/A"}</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div class="card-price">
+                <div class="wrapper">
+                  <p class="reviews">(${
+                    Math.round(pkg.rating * 5) || "No"
+                  } reviews)</p>
+                  <div class="card-rating">
+                    ${generateStarIcons(pkg.rating)}
+                  </div>
+                </div>
+                <p class="price">
+                  $${pkg.priceNU}
+                  <span>/ per person</span>
+                </p>
+                <button class="view-details-btn" data-package-slug="${
+                  pkg.slug
+                }">
+                  <i class="fas fa-eye"></i> View Details
+                </button>
+              </div>
+            </div>
+          `;
+            packageList.appendChild(card);
+          });
+
+          // Re-initialize animations after rendering
+          initPackageAnimations();
+        }
+
+        // Generate star icons based on rating
+        function generateStarIcons(rating = 0) {
+          let stars = "";
+          for (let i = 0; i < 5; i++) {
+            stars += `<ion-icon name="${
+              i < rating ? "star" : "star-outline"
+            }"></ion-icon>`;
+          }
+          return stars;
+        }
+
+        // Add event listener to the package list for delegation
+        document
+          .getElementById("package-list")
+          .addEventListener("click", function (e) {
+            const button = e.target.closest(".view-details-btn");
+            if (button) {
+              const slug = button.dataset.packageSlug;
+              viewPackageDetails(slug);
+            }
+          });
+
+        /**********************************************
+         *             UPCOMING EVENTS LOGIC          *
+         **********************************************/
+
+        // Function to render the event cards
+        function renderUpcomingEvents(events) {
+          const eventsList = document.querySelector(".events-list");
+          if (!eventsList) return;
+
+          eventsList.innerHTML = ""; // Clear
+          fetchedEvents = events; // Cache for modal
+
+          if (!events.length) {
+            eventsList.innerHTML =
+              "<li><p>No upcoming events at the moment.</p></li>";
+            return;
+          }
+
+          events.forEach((event) => {
+            const eventCard = document.createElement("li");
+            eventCard.className = "event-card";
+            eventCard.innerHTML = `
+                    <figure class="event-card-banner">
+                        <img src="${
+                          event.image || "./assets/images/gallery-1.jpg"
+                        }" alt="${event.title}" loading="lazy" />
+                    </figure>
+                    <div class="event-card-content">
+                        <h3 class="event-card-title">${event.title}</h3>
+                        <div class="event-card-info">
+                            <div class="event-card-info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>${new Date(
+                                  event.date
+                                ).toDateString()}</span>
+                            </div>
+                            <div class="event-card-info-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${event.location}</span>
+                            </div>
+                        </div>
+                        <div class="event-card-actions">
+                            <button class="btn btn-primary view-details-btn" data-event-id="${
+                              event._id
+                            }">View Details</button>
+                        </div>
+                    </div>
+                `;
+            eventsList.appendChild(eventCard);
+          });
+
+          eventsList.addEventListener("click", function (e) {
+            const button = e.target.closest(".view-details-btn[data-event-id]");
+            if (button) {
+              const eventId = button.dataset.eventId;
+              openEventModal(eventId);
+            }
+          });
+        }
+
+        // Functions to handle the event modal
+        const eventModal = document.getElementById("eventModal");
+        const closeEventModalBtn = document.getElementById("closeEventModal");
+        const eventModalBody = document.getElementById("eventModalBody");
+
+        function openEventModal(eventId) {
+          const event = fetchedEvents.find((e) => e._id === eventId);
+          if (!event || !eventModalBody) return;
+
+          eventModalBody.innerHTML = `
+                <div class="package-details">
+                  <div class="package-image">
+                    <img src="${
+                      event.image || "./assets/images/gallery-1.jpg"
+                    }" alt="${event.title}">
+                  </div>
+                  <div class="package-info">
+                    <h3>${event.title}</h3>
+                    <div class="package-location" style="margin-bottom: 15px;">
+                        <i class="fas fa-calendar-alt"></i> ${new Date(
+                          event.date
+                        ).toLocaleDateString("en-US", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                    </div>
+                    <div class="package-location" style="margin-bottom: 20px;">
+                        <i class="fas fa-map-marker-alt"></i> ${event.location}
+                    </div>
+                    <p class="package-description">${event.description}</p>
+                  </div>
+                </div>
+            `;
+
+          if (eventModal) eventModal.classList.add("active");
+          document.body.style.overflow = "hidden";
+        }
+
+        function closeEventModal() {
+          if (eventModal) eventModal.classList.remove("active");
+          document.body.style.overflow = "auto";
+        }
+
+        if (closeEventModalBtn)
+          closeEventModalBtn.addEventListener("click", closeEventModal);
+        if (eventModal)
+          eventModal.addEventListener("click", (e) => {
+            if (e.target === eventModal) {
+              closeEventModal();
+            }
+          });
+
+        /**********************************************
+         *               TESTIMONIAL SLIDER            *
+         **********************************************/
+
+        // Initialize testimonial slider
+        function initTestimonialSlider(testimonials) {
+          const testimonialTrack = document.getElementById("testimonialTrack");
+          const testimonialDots = document.getElementById("testimonialDots");
+          const testimonialPrev = document.getElementById("testimonialPrev");
+          const testimonialNext = document.getElementById("testimonialNext");
+
+          if (!testimonialTrack || !testimonialDots) return;
+
+          testimonialTrack.innerHTML = "";
+          testimonialDots.innerHTML = "";
+
+          if (!testimonials.length) {
+            testimonialTrack.innerHTML = `<div class="testimonial-slide"><p>No testimonials available yet.</p></div>`;
+            return;
+          }
+
+          testimonials.forEach((testimonial, index) => {
+            const slide = document.createElement("div");
+            slide.className = "testimonial-slide";
+            if (index === 0) slide.classList.add("active");
+
+            let stars = "";
+            for (let i = 0; i < 5; i++) {
+              stars += `<i class="${
+                i < testimonial.rating ? "fas" : "far"
+              } fa-star star"></i>`;
+            }
+
+            slide.innerHTML = `
+          <div class="testimonial-avatar">
+            <img src="${
+              testimonial.avatar || "https://i.pravatar.cc/150"
+            }" alt="${testimonial.name}" />
+          </div>
+          <div class="testimonial-rating-slider">
+            ${stars}
+          </div>
+          <p class="testimonial-text-slider">"${testimonial.text}"</p>
+          <h4 class="testimonial-author-slider">${testimonial.name}</h4>
+          <p class="testimonial-location">${
+            testimonial.location || "Unknown Location"
+          }</p>
+          ${
+            testimonial.package
+              ? `<span class="testimonial-package">${testimonial.package}</span>`
+              : ""
+          }
+        `;
+            testimonialTrack.appendChild(slide);
+
+            const dot = document.createElement("button");
+            dot.className = "testimonial-slider-dot";
+            if (index === 0) dot.classList.add("active");
+            dot.addEventListener("click", () => goToTestimonialSlide(index));
+            testimonialDots.appendChild(dot);
+          });
+
+          let currentTestimonialSlide = 0;
+          const totalTestimonialSlides = testimonials.length;
+
+          function goToTestimonialSlide(index) {
+            if (totalTestimonialSlides <= 1) return;
+            currentTestimonialSlide = index;
+            testimonialTrack.style.transform = `translateX(-${
+              currentTestimonialSlide * 100
+            }%)`;
+
+            document
+              .querySelectorAll(".testimonial-slide")
+              .forEach((slide, i) => {
+                slide.classList.toggle("active", i === currentTestimonialSlide);
+              });
+
+            document
+              .querySelectorAll(".testimonial-slider-dot")
+              .forEach((dot, i) => {
+                dot.classList.toggle("active", i === currentTestimonialSlide);
+              });
+          }
+
+          function nextTestimonialSlide() {
+            if (totalTestimonialSlides <= 1) return;
+            currentTestimonialSlide =
+              (currentTestimonialSlide + 1) % totalTestimonialSlides;
+            goToTestimonialSlide(currentTestimonialSlide);
+          }
+
+          function prevTestimonialSlide() {
+            if (totalTestimonialSlides <= 1) return;
+            currentTestimonialSlide =
+              (currentTestimonialSlide - 1 + totalTestimonialSlides) %
+              totalTestimonialSlides;
+            goToTestimonialSlide(currentTestimonialSlide);
+          }
+
+          if (testimonialPrev)
+            testimonialPrev.addEventListener("click", prevTestimonialSlide);
+          if (testimonialNext)
+            testimonialNext.addEventListener("click", nextTestimonialSlide);
+
+          let testimonialInterval = setInterval(nextTestimonialSlide, 5000);
+
+          testimonialTrack.addEventListener("mouseenter", () => {
+            clearInterval(testimonialInterval);
+          });
+
+          testimonialTrack.addEventListener("mouseleave", () => {
+            testimonialInterval = setInterval(nextTestimonialSlide, 5000);
+          });
+        }
+
+        /**********************************************
+         *               STATIC PAGE LOGIC              *
+         **********************************************/
+
+        // Create particle effect for hero section
+        function createParticles() {
+          const particlesContainer = document.getElementById("particles");
+          if (!particlesContainer) return;
+          const particleCount = 50;
+
+          for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement("div");
+            particle.classList.add("particle");
+            const size = Math.random() * 3 + 1;
+            const left = Math.random() * 100;
+            const animationDuration = Math.random() * 20 + 10;
+            const animationDelay = Math.random() * 5;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${left}%`;
+            particle.style.animationDuration = `${animationDuration}s`;
+            particle.style.animationDelay = `${animationDelay}s`;
+            particlesContainer.appendChild(particle);
+          }
+        }
+        createParticles();
+
+        // Enhanced button interactions for hero section
+        const heroButtons = document.querySelectorAll(".hero-btn");
+        heroButtons.forEach((button) => {
+          button.addEventListener("click", function (e) {
+            const ripple = document.createElement("span");
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            ripple.classList.add("ripple");
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+          });
+        });
+        const style = document.createElement("style");
+        style.textContent = `
+      .hero-btn { position: relative; overflow: hidden; }
+      .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.5); transform: scale(0); animation: ripple 0.6s linear; pointer-events: none; }
+      @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+    `;
+        document.head.appendChild(style);
+
+        // Scroll indicator interaction
+        const scrollIndicator = document.querySelector(".scroll-indicator");
+        if (scrollIndicator) {
+          scrollIndicator.addEventListener("click", () =>
+            window.scrollTo({ top: window.innerHeight, behavior: "smooth" })
+          );
+          window.addEventListener(
+            "scroll",
+            () =>
+              (scrollIndicator.style.opacity = window.scrollY > 100 ? "0" : "1")
+          );
+        }
+
+        // Gallery functionality
+        const galleryItems = document.querySelectorAll(".gallery-item img");
+        const lightbox = document.getElementById("lightbox");
+        const lightboxImg = document.getElementById("lightbox-img");
+        const lightboxCaption = document.getElementById("lightbox-caption");
+        const lightboxClose = document.getElementById("lightbox-close");
+        const lightboxPrev = document.getElementById("lightbox-prev");
+        const lightboxNext = document.getElementById("lightbox-next");
+        let currentIndex = 0;
+
+        function updateLightbox() {
+          const currentImage = galleryItems[currentIndex];
+          lightboxImg.src = currentImage.src;
+          lightboxCaption.textContent = currentImage.alt;
+        }
+
+        if (galleryItems.length > 0) {
+          galleryItems.forEach((item, index) => {
+            item.addEventListener("click", () => {
+              currentIndex = parseInt(item.getAttribute("data-index"));
+              updateLightbox();
+              lightbox.classList.add("active");
+              document.body.style.overflow = "hidden";
+            });
+          });
+          lightboxClose.addEventListener("click", () => {
+            lightbox.classList.remove("active");
+            document.body.style.overflow = "auto";
+          });
+          lightboxPrev.addEventListener("click", () => {
+            currentIndex =
+              (currentIndex - 1 + galleryItems.length) % galleryItems.length;
+            updateLightbox();
+          });
+          lightboxNext.addEventListener("click", () => {
+            currentIndex = (currentIndex + 1) % galleryItems.length;
+            updateLightbox();
+          });
+          lightbox.addEventListener("click", (e) => {
+            if (e.target === lightbox) {
+              lightbox.classList.remove("active");
+              document.body.style.overflow = "auto";
+            }
+          });
+        }
+
+        // Package details functionality
+        const packageModal = document.getElementById("packageModal");
+        const closeModalBtn = document.getElementById("closeModal");
+        const modalBody = document.getElementById("modalBody");
+
+        closeModalBtn.addEventListener("click", closeModal);
+        packageModal.addEventListener("click", (e) => {
+          if (e.target === packageModal) closeModal();
+        });
+
+        async function viewPackageDetails(slug) {
+          modalBody.innerHTML = "<p>Loading package details...</p>";
+          packageModal.classList.add("active");
+          document.body.style.overflow = "hidden";
+
+          try {
+            const pkg = await fetchPackageBySlug(slug);
+
+            const stars = Array(5)
+              .fill(0)
+              .map(
+                (_, i) =>
+                  `<i class="${
+                    i < Math.round(pkg.rating) ? "fas" : "far"
+                  } fa-star"></i>`
+              )
+              .join("");
+
+            const includedFeatures = (pkg.includes || [])
+              .map(
+                (item) =>
+                  `<div class="feature-item"><i class="fas fa-check"></i> ${item}</div>`
+              )
+              .join("");
+
+            const priceDetailsRows = (pkg.priceDetails || [])
+              .map(
+                (detail) => `
+            <tr>
+              <td>${detail.package || "Standard"}</td>
+              <td>${detail.days || "N/A"}</td>
+              <td>${detail.groupSize || "N/A"}</td>
+              <td>$${detail.tourPrice || "N/A"}</td>
+              <td>$${detail.sdf || "N/A"}</td>
+              <td class="highlight-price">$${
+                detail.totalPerPerson || "N/A"
+              }</td>
+            </tr>`
+              )
+              .join("");
+
+            modalBody.innerHTML = `
+            <div class="package-details">
+              <div class="package-image">
+                <img src="${
+                  pkg.image || "./assets/images/popular-1.jpg"
+                }" alt="${pkg.title}">
+              </div>
+              <div class="package-info">
+                <h3>${pkg.title}</h3>
+                <div class="package-location"><i class="fas fa-map-marker-alt"></i> ${
+                  pkg.location
+                }</div>
+                <div class="package-rating" style="margin-bottom: 15px;">${stars} <span style="font-weight: 600;">${
+              pkg.rating || "N/A"
+            }</span></div>
+                <p class="package-description">${pkg.description}</p>
+                <div class="package-features">
+                  <div class="feature-item"><i class="far fa-clock"></i> ${
+                    pkg.durationText
+                  }</div>
+                  <div class="feature-item"><i class="fas fa-user-friends"></i> ${
+                    pkg.travelers
+                  } Travelers</div>
+                  <div class="feature-item"><i class="fas fa-tag"></i> ${
+                    pkg.type
+                  }</div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                  <h4 style="margin-bottom: 10px;">What's Included:</h4>
+                  <div class="package-features">${includedFeatures}</div>
+                </div>
+                <div class="package-price">$${
+                  pkg.priceNU
+                } <span>per person</span></div>
+              </div>
+            </div>
+            
+            ${
+              priceDetailsRows
+                ? `
+            <div class="price-details">
+              <div class="price-details-header"><i class="fas fa-money-bill-wave"></i> Price Details (USD)</div>
+              <table class="price-table">
+                <thead><tr><th>Package</th><th>Days</th><th>Group Size</th><th>Tour Price/day</th><th>SDF/day</th><th>Total per Person</th></tr></thead>
+                <tbody>${priceDetailsRows}</tbody>
+              </table>
+            </div>`
+                : ""
+            }
+            
+            <div class="booking-form">
+              <h3>Book This Package</h3>
+              <form id="bookingForm">
+                <div class="form-row">
+                  <div class="form-group"><label for="firstName">First Name</label><input type="text" id="firstName" name="firstName" required><div class="error-message" id="firstNameError">Please enter your first name</div></div>
+                  <div class="form-group"><label for="lastName">Last Name</label><input type="text" id="lastName" name="lastName" required><div class="error-message" id="lastNameError">Please enter your last name</div></div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group"><label for="email">Email Address</label><input type="email" id="email" name="email" required><div class="error-message" id="emailError">Please enter a valid email</div></div>
+                  <div class="form-group"><label for="phone">Phone Number</label><input type="tel" id="phone" name="phone" required><div class="error-message" id="phoneError">Please enter a valid phone number</div></div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group"><label for="travelDate">Travel Date</label><input type="date" id="travelDate" name="travelDate" required><div class="error-message" id="travelDateError">Please select a travel date</div></div>
+                  <div class="form-group"><label for="bookingTravelers">Number of Travelers</label><input type="number" id="bookingTravelers" name="travelers" required min="1" value="1"><div class="error-message" id="travelersError">Please select number of travelers</div></div>
+                </div>
+                <div class="form-group"><label for="specialRequests">Special Requests</label><textarea id="specialRequests" name="specialRequests" rows="3" placeholder="Any dietary restrictions, accessibility needs..."></textarea></div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn btn-secondary" id="cancelBooking">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Book Now</button>
+                </div>
+              </form>
+            </div>
+          `;
+
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById("travelDate").min = today;
+
+            document
+              .getElementById("bookingForm")
+              .addEventListener("submit", (e) => {
+                e.preventDefault();
+                submitBooking(pkg);
+              });
+
+            document
+              .getElementById("cancelBooking")
+              .addEventListener("click", closeModal);
+          } catch (error) {
+            console.error(error);
+            modalBody.innerHTML =
+              "<p>Error: Could not load package details. Please try again later.</p>";
+          }
+        }
+
+        // Close modal
+        function closeModal() {
+          packageModal.classList.remove("active");
+          document.body.style.overflow = "auto";
+        }
+
+        async function submitBooking(pkg) {
+          const form = document.getElementById("bookingForm");
+          const fd = new FormData(form);
+
+          const firstName = fd.get("firstName");
+          const lastName = fd.get("lastName");
+          const email = fd.get("email");
+          const phone = fd.get("phone");
+          const travelDate = fd.get("travelDate");
+          const travelers = parseInt(fd.get("travelers"), 10);
+          const specialRequests = fd.get("specialRequests") || "";
+
+          const payload = {
+            package_slug: pkg.slug,
+            packageTitleSnapshot: pkg.title,
+            customer: { firstName, lastName, email, phone },
+            trip: { travelDate, travelers, specialRequests },
+            pricing: {
+              currency: pkg.currency || "USD",
+              packagePriceCents: pkg.priceCents || pkg.priceNU * 100,
+              sdfFeeCents: 0,
+              totalPerPersonCents: pkg.priceCents || pkg.priceNU * 100,
+              totalGroupCents:
+                (pkg.priceCents || pkg.priceNU * 100) * travelers,
+            },
+            source: "WEB_FORM",
+          };
+
+          const submitBtn = form.querySelector('button[type="submit"]');
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Booking...";
+
+          try {
+            const resp = await fetch(`${API_BASE_URL}/bookings`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+              throw new Error(data.error || "Booking failed");
+            }
+
+            modalBody.innerHTML = `
+          <div style="text-align: center; padding: 30px;">
+            <div style="font-size: 4rem; color: #4CAF50; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
+            <h2 style="color: #333; margin-bottom: 15px;">Booking Confirmed!</h2>
+            <p style="margin-bottom: 25px; font-size: 1.1rem;">Thank you for booking <strong>${pkg.title}</strong>. A confirmation has been sent to <strong>${email}</strong>.</p>
+            <p>Booking ID: ${data.bookingId}</p>
+            <button class="btn btn-primary" id="closeConfirmation">Close</button>
+          </div>`;
+            document
+              .getElementById("closeConfirmation")
+              .addEventListener("click", closeModal);
+          } catch (err) {
+            console.error(err);
+            alert(`Booking Error: ${err.message}`);
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Book Now";
+          }
+        }
+
+        // Initialize package section animations
+        function initPackageAnimations() {
+          const packageSection = document.getElementById("package");
+          if (!packageSection) return;
+          const packageObserver = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target
+                    .querySelector(".package-list")
+                    .classList.add("animate");
+                  entry.target
+                    .querySelectorAll(".package-card")
+                    .forEach((card) => card.classList.add("animate"));
+                  packageObserver.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.3 }
+          );
+          packageObserver.observe(packageSection);
+        }
+
+        // ===============================
+        // WhatsApp FAB + Popup
+        // ===============================
+        const WHATSAPP_PHONE = "97517123456"; // TODO: set your real number
+        const DEFAULT_MSG = "Hi! I’m interested in a tour package.";
+
+        const wpFab = document.getElementById("whatsappFab");
+        const wpPopup = document.getElementById("whatsappPopup");
+        const wpClose = document.getElementById("wpClose");
+        const wpStart = document.getElementById("wpStart");
+        const wpName = document.getElementById("wpName");
+        const wpMessage = document.getElementById("wpMessage");
+
+        // Toggle popup
+        wpFab?.addEventListener("click", () => {
+          const isOpen = wpPopup.classList.contains("active");
+          wpPopup.classList.toggle("active", !isOpen);
+          wpPopup.setAttribute("aria-hidden", String(isOpen));
+        });
+
+        // Close popup
+        wpClose?.addEventListener("click", () => {
+          wpPopup.classList.remove("active");
+          wpPopup.setAttribute("aria-hidden", "true");
+        });
+
+        // Click outside to close
+        document.addEventListener("click", (e) => {
+          if (!wpPopup.contains(e.target) && !wpFab.contains(e.target)) {
+            wpPopup.classList.remove("active");
+            wpPopup.setAttribute("aria-hidden", "true");
+          }
+        });
+
+        // Start chat
+        wpStart?.addEventListener("click", () => {
+          const name = (wpName.value || "").trim();
+          const msg = (wpMessage.value || DEFAULT_MSG).trim();
+          const fullMsg = name ? `${msg}\n\n- ${name}` : msg;
+
+          if (!WHATSAPP_PHONE || !/^\d{6,15}$/.test(WHATSAPP_PHONE)) {
+            alert("WhatsApp phone number is not configured correctly.");
+            return;
+          }
+
+          const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(
+            fullMsg
+          )}`;
+          window.open(url, "_blank", "noopener");
+        });
+
+        // --- INITIALIZE THE PAGE ---
+        initializePage();
+      });
+    </script>
+
+    <!-- Ionicon -->
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
+  </body>
+</html>

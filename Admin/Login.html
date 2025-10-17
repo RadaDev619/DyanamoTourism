@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TravelVibe | Admin Login</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      :root {
+        --primary: #1a73e8;
+        --primary-dark: #0d47a1;
+        --primary-light: #64b5f6;
+        --accent: #00bcd4;
+        --accent-light: #80deea;
+        --text: #202124;
+        --text-light: #5f6368;
+        --bg: #f8fafd;
+        --card-bg: #ffffff;
+        --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.12);
+        --transition: all 0.3s ease;
+        --radius: 16px;
+        --gradient: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--primary-dark) 100%
+        );
+        --accent-gradient: linear-gradient(
+          135deg,
+          var(--accent) 0%,
+          var(--accent-light) 100%
+        );
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--text);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        background-image: radial-gradient(
+            circle at 10% 20%,
+            rgba(26, 115, 232, 0.05) 0%,
+            transparent 20%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(0, 188, 212, 0.05) 0%,
+            transparent 20%
+          );
+      }
+
+      .login-container {
+        display: flex;
+        width: 1000px;
+        max-width: 95%;
+        background: white;
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        animation: fadeIn 0.8s ease-out;
+        transition: var(--transition);
+      }
+      .login-container:hover {
+        box-shadow: var(--shadow-hover);
+      }
+
+      .login-left {
+        flex: 1;
+        background: var(--gradient);
+        color: white;
+        padding: 50px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .login-left::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 200%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(30deg);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        position: relative;
+        z-index: 1;
+      }
+      .logo i {
+        font-size: 32px;
+        margin-right: 12px;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+      }
+      .logo h1 {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+
+      .welcome-text {
+        position: relative;
+        z-index: 1;
+      }
+      .welcome-text h2 {
+        font-size: 36px;
+        margin-bottom: 15px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+      .welcome-text p {
+        font-size: 16px;
+        line-height: 1.6;
+        opacity: 0.9;
+        margin-bottom: 30px;
+      }
+
+      .features {
+        list-style: none;
+        position: relative;
+        z-index: 1;
+      }
+      .features li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        font-size: 15px;
+        animation: slideIn 0.5s ease forwards;
+        opacity: 0;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .features li:last-child {
+        border-bottom: none;
+      }
+      .features li:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+      .features li:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .features li:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      .features li:nth-child(4) {
+        animation-delay: 0.4s;
+      }
+      .features li:nth-child(5) {
+        animation-delay: 0.5s;
+      }
+      .features i {
+        margin-right: 12px;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 18px;
+        width: 20px;
+        text-align: center;
+      }
+
+      .login-right {
+        flex: 1;
+        padding: 50px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: var(--card-bg);
+      }
+      .login-header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+      .login-header h2 {
+        color: var(--primary-dark);
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        letter-spacing: -0.5px;
+      }
+      .login-header p {
+        color: var(--text-light);
+        font-size: 15px;
+      }
+
+      .form-group {
+        margin-bottom: 25px;
+        position: relative;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text);
+        font-weight: 500;
+        font-size: 14px;
+      }
+      .input-with-icon {
+        position: relative;
+      }
+      .input-with-icon i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+        font-size: 18px;
+        transition: var(--transition);
+      }
+      .form-control {
+        width: 100%;
+        padding: 16px 50px 16px 50px;
+        border: 2px solid #e8eaed;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: var(--transition);
+        background: #f8f9fa;
+        color: var(--text);
+      }
+      .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: white;
+        box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
+      }
+      .form-control:focus + i {
+        color: var(--primary);
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-light);
+        cursor: pointer;
+        font-size: 18px;
+        transition: var(--transition);
+        z-index: 2;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+      .password-toggle:hover {
+        color: var(--primary);
+        background: rgba(26, 115, 232, 0.1);
+      }
+
+      .options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        font-size: 14px;
+      }
+      .remember-me {
+        display: flex;
+        align-items: center;
+      }
+      .remember-me input {
+        margin-right: 8px;
+        accent-color: var(--primary);
+        width: 16px;
+        height: 16px;
+      }
+      .forgot-password {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        position: relative;
+      }
+      .forgot-password::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--primary);
+        transition: var(--transition);
+      }
+      .forgot-password:hover {
+        color: var(--primary-dark);
+      }
+      .forgot-password:hover::after {
+        width: 100%;
+      }
+
+      .login-btn {
+        width: 100%;
+        padding: 16px;
+        background: var(--gradient);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+      .login-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: 0.5s;
+      }
+      .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
+      }
+      .login-btn:hover::before {
+        left: 100%;
+      }
+      .login-btn:active {
+        transform: translateY(0);
+      }
+      .login-btn i {
+        margin-right: 10px;
+        font-size: 18px;
+      }
+      .login-btn[disabled] {
+        opacity: 0.8;
+        cursor: not-allowed;
+      }
+
+      .divider {
+        text-align: center;
+        margin: 30px 0;
+        position: relative;
+        color: var(--text-light);
+        font-size: 14px;
+      }
+      .divider::before,
+      .divider::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 45%;
+        height: 1px;
+        background: #e8eaed;
+      }
+      .divider::before {
+        left: 0;
+      }
+      .divider::after {
+        right: 0;
+      }
+
+      .social-login {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+      .social-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #f8f9fa;
+        border: 2px solid #e8eaed;
+        color: var(--text-light);
+        font-size: 20px;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+      }
+      .social-btn::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--gradient);
+        opacity: 0;
+        transition: var(--transition);
+        border-radius: 50%;
+      }
+      .social-btn i {
+        position: relative;
+        z-index: 1;
+      }
+      .social-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+        border-color: transparent;
+      }
+      .social-btn:hover::before {
+        opacity: 1;
+      }
+      .social-btn:hover i {
+        color: white;
+      }
+
+      .footer-links {
+        text-align: center;
+        font-size: 14px;
+        color: var(--text-light);
+      }
+      .footer-links a {
+        color: var(--primary);
+        text-decoration: none;
+        transition: var(--transition);
+        font-weight: 500;
+      }
+      .footer-links a:hover {
+        text-decoration: underline;
+      }
+
+      .error-message {
+        color: #f44336;
+        font-size: 14px;
+        margin-top: 5px;
+        display: none;
+        font-weight: 500;
+      }
+
+      /* NEW: server alert */
+      .form-alert {
+        display: none;
+        margin-bottom: 18px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: #fdecea;
+        color: #b00020;
+        border: 1px solid #f5c6cb;
+        font-weight: 600;
+      }
+      .form-alert.show {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateX(-20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        10%,
+        30%,
+        50%,
+        70%,
+        90% {
+          transform: translateX(-5px);
+        }
+        20%,
+        40%,
+        60%,
+        80% {
+          transform: translateX(5px);
+        }
+      }
+      .shake {
+        animation: shake 0.5s ease-in-out;
+      }
+
+      @media (max-width: 768px) {
+        .login-container {
+          flex-direction: column;
+        }
+        .login-left {
+          padding: 30px 25px;
+        }
+        .login-right {
+          padding: 30px 25px;
+        }
+        .welcome-text h2 {
+          font-size: 28px;
+        }
+        .login-header h2 {
+          font-size: 28px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="login-left">
+        <div class="logo">
+          <i class="fas fa-plane"></i>
+          <h1>TravelVibe</h1>
+        </div>
+        <div class="welcome-text">
+          <h2>Admin Portal</h2>
+          <p>
+            Access your dashboard to manage tours, bookings, customers, and
+            analytics for your travel agency.
+          </p>
+        </div>
+        <ul class="features">
+          <li>
+            <i class="fas fa-check-circle"></i> Manage bookings and reservations
+          </li>
+          <li><i class="fas fa-check-circle"></i> View customer analytics</li>
+          <li><i class="fas fa-check-circle"></i> Update tour packages</li>
+          <li>
+            <i class="fas fa-check-circle"></i> Process payments and refunds
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i> Generate reports and insights
+          </li>
+        </ul>
+      </div>
+
+      <div class="login-right">
+        <div class="login-header">
+          <h2>Admin Sign In</h2>
+          <p>Enter your credentials to access the admin panel</p>
+        </div>
+
+        <!-- Server-side error/info -->
+        <div id="formAlert" class="form-alert" role="alert"></div>
+
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="username">Email</label>
+            <div class="input-with-icon">
+              <i class="fas fa-user"></i>
+              <input
+                type="text"
+                id="username"
+                class="form-control"
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+            <div class="error-message" id="username-error">
+              Please enter a valid email
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-with-icon">
+              <i class="fas fa-lock"></i>
+              <input
+                type="password"
+                id="password"
+                class="form-control"
+                placeholder="Enter your password"
+                required
+              />
+              <button type="button" class="password-toggle" id="togglePassword">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="error-message" id="password-error">
+              Password must be at least 8 characters
+            </div>
+          </div>
+
+          <div class="options">
+            <div class="remember-me">
+              <input type="checkbox" id="remember" />
+              <label for="remember">Remember me</label>
+            </div>
+            <a href="#" class="forgot-password">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="login-btn">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+          </button>
+        </form>
+
+        <div class="divider">or continue with</div>
+
+        <div class="social-login">
+          <button class="social-btn google">
+            <i class="fab fa-google"></i>
+          </button>
+          <button class="social-btn github">
+            <i class="fab fa-github"></i>
+          </button>
+          <button class="social-btn microsoft">
+            <i class="fab fa-microsoft"></i>
+          </button>
+        </div>
+
+        <div class="footer-links">
+          <p>Need help? <a href="#">Contact Support</a></p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ---- CONFIG ----
+      const API_BASE =
+        location.hostname === "localhost" || location.hostname === "127.0.0.1"
+          ? "http://localhost:4000"
+          : ""; // same-origin in prod
+      const DASHBOARD_URL = "/Admin/AdminDashboard.html"; // change to your real dashboard page
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const loginForm = document.getElementById("loginForm");
+        const togglePassword = document.getElementById("togglePassword");
+        const passwordInput = document.getElementById("password");
+        const usernameInput = document.getElementById("username");
+        const usernameError = document.getElementById("username-error");
+        const passwordError = document.getElementById("password-error");
+        const formAlert = document.getElementById("formAlert");
+        const remember = document.getElementById("remember");
+        const loginBtn = document.querySelector(".login-btn");
+
+        // Redirect if already logged in
+        const existingToken =
+          localStorage.getItem("tv_admin_token") ||
+          sessionStorage.getItem("tv_admin_token");
+        if (existingToken) {
+          window.location.replace(DASHBOARD_URL);
+          return;
+        }
+
+        // Toggle password visibility
+        togglePassword.addEventListener("click", () => {
+          const type =
+            passwordInput.getAttribute("type") === "password"
+              ? "text"
+              : "password";
+          passwordInput.setAttribute("type", type);
+          togglePassword.innerHTML =
+            type === "password"
+              ? '<i class="fas fa-eye"></i>'
+              : '<i class="fas fa-eye-slash"></i>';
+        });
+
+        const showAlert = (msg) => {
+          formAlert.textContent = msg;
+          formAlert.classList.add("show");
+        };
+        const clearAlert = () => {
+          formAlert.textContent = "";
+          formAlert.classList.remove("show");
+        };
+        const shake = (el) => {
+          el.classList.add("shake");
+          setTimeout(() => el.classList.remove("shake"), 500);
+        };
+        const isEmail = (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+
+        loginForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          clearAlert();
+
+          const email = usernameInput.value.trim();
+          const password = passwordInput.value;
+
+          // Client-side validation
+          let ok = true;
+          usernameError.style.display = "none";
+          passwordError.style.display = "none";
+
+          if (!isEmail(email)) {
+            usernameError.style.display = "block";
+            shake(usernameInput);
+            ok = false;
+          }
+          if (!password || password.length < 8) {
+            passwordError.style.display = "block";
+            shake(passwordInput);
+            ok = false;
+          }
+          if (!ok) return;
+
+          try {
+            loginBtn.disabled = true;
+            loginBtn.innerHTML =
+              '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+
+            const resp = await fetch(`${API_BASE}/api/admin/login`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            });
+
+            const data = await resp.json().catch(() => ({}));
+
+            if (!resp.ok) {
+              // expected: { error: "Invalid credentials" } etc.
+              showAlert(data?.error || "Login failed. Please try again.");
+              shake(loginForm);
+              loginBtn.disabled = false;
+              loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+              return;
+            }
+
+            // Store token + minimal admin profile
+            const storage = remember.checked ? localStorage : sessionStorage;
+            storage.setItem("tv_admin_token", data.token);
+            if (data.admin)
+              storage.setItem("tv_admin", JSON.stringify(data.admin));
+
+            // Redirect to dashboard
+            window.location.href = DASHBOARD_URL;
+          } catch (err) {
+            showAlert(
+              "Network error. Please check your connection and try again."
+            );
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+          }
+        });
+
+        // Input focus effects
+        document.querySelectorAll(".form-control").forEach((input) => {
+          input.addEventListener("focus", function () {
+            this.parentElement.parentElement.classList.add("focused");
+          });
+          input.addEventListener("blur", function () {
+            this.parentElement.parentElement.classList.remove("focused");
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
