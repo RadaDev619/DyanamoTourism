@@ -35,7 +35,7 @@ app.use(morgan("dev"));
 const PORT = process.env.PORT || 4000;
 const MONGODB_URI =
     process.env.MONGODB_URI ||
-    "mongodb+srv://radabisdorji_db_user:3uERWIWgSbsoLiuA@dynamotourism.nrampns.mongodb.net/";
+    "mongodb+srv://:@dynamotourism.nrampns.mongodb.net/";
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
